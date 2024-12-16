@@ -10,12 +10,15 @@ import {
 } from "react-native";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react-native";
 import TransactionHistoryItem from "../components/TranscationHistory/TransactionHistoryItem";
-import { useAppDispatch, useAppSelector } from "../store/hook";
+import {
+  useTansactionHistoryDispatch,
+  useTransactionHistorySelector,
+} from "../store/hook";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   fetchTransactions,
   revealAmounts,
-} from "../store/slices/transactionSlice";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+} from "../store/slices/transactionActions";
 
 interface TransactionHistoryScreenProps {
   navigation: {
@@ -27,8 +30,8 @@ interface TransactionHistoryScreenProps {
 const TransactionHistoryScreen: React.FC<TransactionHistoryScreenProps> = ({
   navigation,
 }) => {
-  const dispatch = useAppDispatch();
-  const { transactions, showAmounts, loading } = useAppSelector(
+  const dispatch = useTansactionHistoryDispatch();
+  const { transactions, showAmounts, loading } = useTransactionHistorySelector(
     (state) => state.transactions
   );
 

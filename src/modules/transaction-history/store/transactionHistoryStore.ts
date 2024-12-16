@@ -1,26 +1,47 @@
-import { configureStore } from "@reduxjs/toolkit";
-import transactionReducer from "./slices/transactionSlice"; // Example slice
-import { TransactionService } from "../services/transctionService";
-import { BiometricService } from "../../core/services/biometricService";
+import {
+  configureStore,
+  Dispatch,
+  ThunkDispatch,
+  UnknownAction,
+} from "@reduxjs/toolkit";
+import { DependencyContainer } from "../../core/di/dependencyContainer";
+import { IBiometricService } from "../../core/services/biometricService";
+import { ITransactionService } from "../services/transctionService";
+import transactionReducer from "./slices/transactionSlice";
 
-export const transactionHistoryStore = configureStore({
-  reducer: {
-    transactions: transactionReducer,
-  },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      thunk: {
-        extraArgument: {
-          transactionService: TransactionService,
-          biometricService: BiometricService,
+export const createTransactionHistoryStore = ({
+  transactionService,
+  biometricService,
+}: {
+  transactionService: ITransactionService;
+  biometricService: IBiometricService;
+}) => {
+  return configureStore({
+    reducer: {
+      transactions: transactionReducer,
+    },
+    middleware: (getDefaultMiddleware) => {
+      let dependencyContainer = DependencyContainer.getInstance();
+
+      return getDefaultMiddleware({
+        thunk: {
+          extraArgument: {
+            transactionService: transactionService,
+            biometricService: biometricService,
+          },
         },
-      },
-    }),
-});
+      });
+    },
+  });
+};
 
-// TypeScript-specific: Define RootState and AppDispatch
-export type TransactionHistoryState = ReturnType<
-  typeof transactionHistoryStore.getState
+export type TransactionHistoryDispatch = ThunkDispatch<
+  {
+    transactions: ReturnType<typeof transactionReducer>;
+  },
+  {
+    transactionService: ITransactionService;
+    biometricService: IBiometricService;
+  },
+  UnknownAction
 >;
-export type TransactionHistoryDispatch =
-  typeof transactionHistoryStore.dispatch;

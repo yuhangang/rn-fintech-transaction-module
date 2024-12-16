@@ -5,6 +5,7 @@ import {
 } from "./transactionHistoryStore";
 
 // Use throughout your app instead of plain `useDispatch` and `useSelector`
-export const useAppDispatch = () => useDispatch<TransactionHistoryDispatch>();
-export const useAppSelector: TypedUseSelectorHook<TransactionHistoryState> =
+export const useTansactionHistoryDispatch = () =>
+  useDispatch<TransactionHistoryDispatch>();
+export const useTransactionHistorySelector: TypedUseSelectorHook<TransactionHistoryState> =
   useSelector;

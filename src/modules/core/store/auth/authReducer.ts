@@ -6,7 +6,6 @@ import {
   SET_IS_LOGGED_IN,
 } from "./authActions";
 
-// Define the shape of the auth state
 export interface AuthState {
   isLoggedIn: boolean;
   isAuthenticated: boolean;
@@ -17,7 +16,7 @@ export interface AuthState {
 const initialState: AuthState = {
   isLoggedIn: false,
   isAuthenticated: false,
-  idleTimeout: 60 * 1000, // 1 minute default
+  idleTimeout: 60 * 1000,
 };
 
 // Reducer

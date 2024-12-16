@@ -1,9 +1,11 @@
 // src/redux/store.ts
-import { combineReducers, applyMiddleware } from "redux";
-import { configureStore, Tuple } from "@reduxjs/toolkit";
-import { thunk } from "redux-thunk";
+import { configureStore } from "@reduxjs/toolkit";
+import { combineReducers, Dispatch, UnknownAction } from "redux";
+import { ThunkDispatch } from "redux-thunk";
+import { DependencyContainer } from "../di/dependencyContainer";
+import { IBiometricService } from "../services/biometricService";
+import { AuthAction } from "./auth/authActions";
 import authReducer from "./auth/authReducer";
-import { BiometricService } from "../services/biometricService";
 
 // Combine reducers
 const rootReducer = combineReducers({
@@ -12,17 +14,35 @@ const rootReducer = combineReducers({
 });
 
 // Create store
-const store = configureStore({
-  reducer: rootReducer,
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      thunk: {
-        extraArgument: {
-          auth: BiometricService,
-        },
-      },
-    }),
-});
+const createStore = ({
+  biometricService,
+}: {
+  biometricService: IBiometricService;
+}) => {
+  const dependencyContainer = DependencyContainer.getInstance();
 
-export type RootState = ReturnType<typeof rootReducer>;
-export default store;
+  return configureStore({
+    reducer: rootReducer,
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware({
+        thunk: {
+          extraArgument: {
+            biometricService: biometricService,
+          },
+        },
+      }),
+  });
+};
+
+export type AuthState = ReturnType<typeof rootReducer>;
+export type AuthDispatch = ThunkDispatch<
+  {
+    auth: AuthState;
+  },
+  {
+    biometricService: IBiometricService;
+  },
+  UnknownAction
+> &
+  Dispatch<AuthAction>;
+export default createStore;

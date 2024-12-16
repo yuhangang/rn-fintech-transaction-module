@@ -5,23 +5,20 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import { Provider } from "react-redux";
 import AppAuthWrapper from "./src/app/components/AppAuthWrapper";
-import { ServiceProvider } from "./src/context/ServiceProvider";
-import store from "./src/modules/core/store/store";
 import AppNavigator from "./src/navigation/AppNavigator";
+import AppProvider from "./src/app/AppProvider";
 
 // Wrap App with Redux Provider
 export default () => {
   return (
-    <Provider store={store}>
+    <AppProvider>
       <SafeAreaProvider>
-        <ServiceProvider>
-          <AppAuthWrapper>
-            <AppNavigator />
-          </AppAuthWrapper>
-        </ServiceProvider>
+        <AppAuthWrapper>
+          <AppNavigator />
+        </AppAuthWrapper>
       </SafeAreaProvider>
       <Toast />
-    </Provider>
+    </AppProvider>
   );
 };
 

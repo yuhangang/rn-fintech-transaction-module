@@ -14,17 +14,18 @@ import {
   loginUser,
   setAuthenticated,
 } from "../../modules/core/store/auth/authActions";
-import { RootState } from "../../modules/core/store/store";
+import { AuthState } from "../../modules/core/store/store";
 import { LoginScreen } from "./LoginScreen";
+import { useAuthDispatch } from "../../modules/core/store/auth/hook";
 
 export default function AppLifeycleWrapper({
   children,
 }: {
   children?: React.ReactNode;
 }) {
-  const dispatch: ThunkDispatch<RootState, void, Action> = useDispatch();
+  const dispatch = useAuthDispatch();
   const { isAuthenticated, isLoggedIn } = useSelector(
-    (state: RootState) => state.auth
+    (state: AuthState) => state.auth
   );
 
   const appState = useRef(AppState.currentState);
