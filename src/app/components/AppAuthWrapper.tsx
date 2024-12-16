@@ -1,16 +1,16 @@
 import { Action, ThunkDispatch } from "@reduxjs/toolkit";
-import React, { useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import {
   AppState,
   AppStateStatus,
   Modal,
-  View,
+  PanResponder,
   StyleSheet,
+  View,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import {
   authenticateUser,
-  handleIdleTimeout,
   loginUser,
   setAuthenticated,
 } from "../../modules/core/store/auth/authActions";
@@ -23,52 +23,72 @@ export default function AppLifeycleWrapper({
   children?: React.ReactNode;
 }) {
   const dispatch: ThunkDispatch<RootState, void, Action> = useDispatch();
-  const { isAuthenticated, isLoggedIn, idleTimeout } = useSelector(
+  const { isAuthenticated, isLoggedIn } = useSelector(
     (state: RootState) => state.auth
   );
 
   const appState = useRef(AppState.currentState);
   const idleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const resetIdleTimer = () => {
+  const resetIdleTimer = useCallback(() => {
     if (idleTimeoutRef.current) {
       clearTimeout(idleTimeoutRef.current);
     }
-    idleTimeoutRef.current = setTimeout(() => {
-      dispatch(handleIdleTimeout());
-    }, idleTimeout);
-  };
 
+    idleTimeoutRef.current = setTimeout(() => {
+      dispatch(setAuthenticated(false));
+    }, 60000);
+  }, [dispatch]);
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => {
+        if (isLoggedIn && isAuthenticated) {
+          resetIdleTimer();
+        }
+        return false;
+      },
+      onMoveShouldSetPanResponder: () => {
+        if (isLoggedIn && isAuthenticated) {
+          resetIdleTimer();
+        }
+        return false;
+      },
+    })
+  ).current;
+
+  // App state change handler
   useEffect(() => {
     const handleAppStateChange = (nextAppState: AppStateStatus) => {
-      if (appState.current === "active" && nextAppState === "background") {
-        dispatch(setAuthenticated(false));
-      }
-
       if (appState.current === "background" && nextAppState === "active") {
-        dispatch(isLoggedIn ? authenticateUser() : loginUser());
+        if (!isAuthenticated || !isLoggedIn) {
+          dispatch(isLoggedIn ? authenticateUser() : loginUser());
+        }
       }
 
       appState.current = nextAppState;
     };
 
-    if (isLoggedIn) {
-      const subscription = AppState.addEventListener(
-        "change",
-        handleAppStateChange
-      );
+    const subscription = AppState.addEventListener(
+      "change",
+      handleAppStateChange
+    );
 
-      return () => {
-        subscription.remove();
-      };
-    }
-  }, [dispatch, isLoggedIn]);
+    return () => {
+      subscription.remove();
 
+      if (idleTimeoutRef.current) {
+        clearTimeout(idleTimeoutRef.current);
+      }
+    };
+  }, [dispatch, isLoggedIn, isAuthenticated]);
+
+  // Idle timer setup
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isLoggedIn && isAuthenticated) {
       resetIdleTimer();
     }
-  }, [isAuthenticated, idleTimeout, dispatch]);
+  }, [isLoggedIn, isAuthenticated, resetIdleTimer]);
 
   if (!isLoggedIn) {
     return (
@@ -81,7 +101,7 @@ export default function AppLifeycleWrapper({
   }
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} {...panResponder.panHandlers}>
       {children}
       <Modal
         visible={isLoggedIn && !isAuthenticated}
@@ -91,7 +111,7 @@ export default function AppLifeycleWrapper({
         <View style={styles.modalOverlay}>
           <LoginScreen
             onPress={async () => {
-              await dispatch(authenticateUser());
+              dispatch(authenticateUser());
             }}
           />
         </View>
