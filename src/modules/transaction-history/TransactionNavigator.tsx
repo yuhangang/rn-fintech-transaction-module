@@ -4,7 +4,6 @@ import { transactionHistoryStore } from "./store/transactionHistoryStore";
 import { createStackNavigator } from "@react-navigation/stack";
 import TransactionDetailScreen from "./screens/TransactionDetailScreen";
 import TransactionHistoryScreen from "./screens/TransactionHistoryScreen";
-import TransactionHistoryRoute from "./screens/TransactionHistoryRoute";
 
 const Stack = createStackNavigator();
 
@@ -14,7 +13,16 @@ export const TransactionNavigator = () => (
       initialRouteName="TransactionHistory"
       screenOptions={{ headerShown: false }}
     >
-      <TransactionHistoryRoute Stack={Stack} />
+      <Stack.Screen
+        name="TransactionHistory"
+        component={TransactionHistoryScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="TransactionDetail"
+        component={TransactionDetailScreen}
+        options={{ headerShown: false }}
+      />
     </Stack.Navigator>
   </Provider>
 );
