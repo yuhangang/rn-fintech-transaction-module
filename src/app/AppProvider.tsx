@@ -5,10 +5,14 @@ import {
   IBiometricService,
 } from "../modules/core/services/biometricService";
 import { TransactionService } from "../modules/transaction-history/services/transctionService";
-import store from "../modules/core/store/store";
+import { createAuthStore } from "../modules/core/store/auth/authStore";
 import { ErrorTrackingService } from "../modules/core/services/errorTrackingService";
 import { LoggerService } from "../modules/core/services/loggerService";
 import { useEffect, useState } from "react";
+import {
+  IToastService,
+  ToastService,
+} from "../modules/core/services/toastService";
 
 function AppProvider(props: { children?: React.ReactNode }) {
   const [isReady, setIsReady] = useState(false);
@@ -25,6 +29,7 @@ function AppProvider(props: { children?: React.ReactNode }) {
         transactionService: TransactionService,
         loggerService: loggerService,
         errorLoggingService: errorTrackingService,
+        toastService: ToastService,
       });
 
       setIsReady(true);
@@ -38,9 +43,13 @@ function AppProvider(props: { children?: React.ReactNode }) {
 
     return (
       <Provider
-        store={store({
+        store={createAuthStore({
           biometricService:
             dependencyContainer.resolve<IBiometricService>("biometricService"),
+          toastService:
+            dependencyContainer.resolve<IToastService>("toastService"),
+          loggerService:
+            dependencyContainer.resolve<LoggerService>("loggerService"),
         })}
       >
         {props.children}

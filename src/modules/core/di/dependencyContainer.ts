@@ -2,6 +2,7 @@ import { ITransactionService } from "../../transaction-history/services/transcti
 import { type IBiometricService } from "../services/biometricService";
 import { IErrorTrackingService } from "../services/errorTrackingService";
 import { ILoggerService } from "../services/loggerService";
+import { IToastService } from "../services/toastService";
 
 export class DependencyContainer {
   private static instance: DependencyContainer;
@@ -33,10 +34,12 @@ export class DependencyContainer {
     transactionService: ITransactionService;
     loggerService: ILoggerService;
     errorLoggingService: IErrorTrackingService;
+    toastService: IToastService;
   }) {
     this.register("biometricService", props.biometricService);
     this.register("transactionService", props.transactionService);
     this.register("loggerService", props.loggerService);
     this.register("errorLoggingService", props.errorLoggingService);
+    this.register("toastService", props.toastService);
   }
 }
