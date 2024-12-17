@@ -1,12 +1,13 @@
+import { createStackNavigator } from "@react-navigation/stack";
 import React from "react";
 import { Provider } from "react-redux";
-import { createTransactionHistoryStore } from "./store/transactionHistoryStore";
-import { createStackNavigator } from "@react-navigation/stack";
+import { DependencyContainer } from "../core/di/dependencyContainer";
+import { IBiometricService } from "../core/services/biometricService";
+import { ILoggerService } from "../core/services/loggerService";
 import TransactionDetailScreen from "./screens/TransactionDetailScreen";
 import TransactionHistoryScreen from "./screens/TransactionHistoryScreen";
 import { ITransactionService } from "./services/transctionService";
-import { IBiometricService } from "../core/services/biometricService";
-import { DependencyContainer } from "../core/di/dependencyContainer";
+import { createTransactionHistoryStore } from "./store/transactionHistoryStore";
 
 const Stack = createStackNavigator();
 
@@ -22,6 +23,8 @@ export const TransactionNavigator = () => {
           ),
         biometricService:
           dependencyContainer.resolve<IBiometricService>("biometricService"),
+        loggerService:
+          dependencyContainer.resolve<ILoggerService>("loggerService"),
       })}
     >
       <Stack.Navigator

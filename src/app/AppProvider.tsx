@@ -7,7 +7,10 @@ import {
 import { TransactionService } from "../modules/transaction-history/services/transctionService";
 import { createAuthStore } from "../modules/core/store/auth/authStore";
 import { ErrorTrackingService } from "../modules/core/services/errorTrackingService";
-import { LoggerService } from "../modules/core/services/loggerService";
+import {
+  ILoggerService,
+  LoggerService,
+} from "../modules/core/services/loggerService";
 import { useEffect, useState } from "react";
 import {
   IToastService,
@@ -49,7 +52,7 @@ function AppProvider(props: { children?: React.ReactNode }) {
           toastService:
             dependencyContainer.resolve<IToastService>("toastService"),
           loggerService:
-            dependencyContainer.resolve<LoggerService>("loggerService"),
+            dependencyContainer.resolve<ILoggerService>("loggerService"),
         })}
       >
         {props.children}

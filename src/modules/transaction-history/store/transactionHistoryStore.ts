@@ -1,47 +1,50 @@
 import {
+  combineReducers,
   configureStore,
-  Dispatch,
   ThunkDispatch,
   UnknownAction,
 } from "@reduxjs/toolkit";
-import { DependencyContainer } from "../../core/di/dependencyContainer";
 import { IBiometricService } from "../../core/services/biometricService";
+import { ILoggerService } from "../../core/services/loggerService";
+import { Transaction } from "../models/Transaction";
 import { ITransactionService } from "../services/transctionService";
 import transactionReducer from "./slices/transactionSlice";
+
+export type TransactionsState = {
+  transactions: Transaction[];
+  showAmounts: boolean;
+  loading: boolean;
+  error: string | null;
+};
+
+export type TransactionExtra = {
+  transactionService: ITransactionService;
+  biometricService: IBiometricService;
+  loggerService: ILoggerService;
+};
 
 export const createTransactionHistoryStore = ({
   transactionService,
   biometricService,
-}: {
-  transactionService: ITransactionService;
-  biometricService: IBiometricService;
-}) => {
+  loggerService,
+}: TransactionExtra) => {
   return configureStore({
-    reducer: {
-      transactions: transactionReducer,
-    },
-    middleware: (getDefaultMiddleware) => {
-      let dependencyContainer = DependencyContainer.getInstance();
-
-      return getDefaultMiddleware({
+    reducer: transactionReducer,
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware({
         thunk: {
-          extraArgument: {
+          extraArgument: <TransactionExtra>{
             transactionService: transactionService,
             biometricService: biometricService,
+            loggerService: loggerService,
           },
         },
-      });
-    },
+      }),
   });
 };
 
 export type TransactionHistoryDispatch = ThunkDispatch<
-  {
-    transactions: ReturnType<typeof transactionReducer>;
-  },
-  {
-    transactionService: ITransactionService;
-    biometricService: IBiometricService;
-  },
+  TransactionsState,
+  TransactionExtra,
   UnknownAction
 >;

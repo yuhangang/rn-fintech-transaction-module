@@ -1,16 +1,7 @@
 // src/redux/transactionSlice.ts
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { Transaction } from "../../models/Transaction";
-import { ITransactionService } from "../../services/transctionService";
-import { IBiometricService } from "../../../core/services/biometricService";
+import { createSlice } from "@reduxjs/toolkit";
+import { TransactionsState } from "../transactionHistoryStore";
 import { fetchTransactions, revealAmounts } from "./transactionActions";
-
-export type TransactionsState = {
-  transactions: Transaction[];
-  showAmounts: boolean;
-  loading: boolean;
-  error: string | null;
-};
 
 // Initial state
 const initialState: TransactionsState = {
@@ -25,7 +16,7 @@ const transactionsSlice = createSlice({
   name: "transactions",
   initialState,
   reducers: {
-    resetTransactions: (state) => {
+    resetTransactions: (state: TransactionsState) => {
       state.transactions = [];
       state.showAmounts = false;
     },

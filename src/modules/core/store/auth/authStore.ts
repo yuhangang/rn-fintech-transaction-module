@@ -53,6 +53,5 @@ export type AuthDispatch = ThunkDispatch<
     auth: AuthState;
   },
   AuthExtras,
-  UnknownAction
-> &
-  Dispatch<AuthAction>;
+  AuthAction
+>;

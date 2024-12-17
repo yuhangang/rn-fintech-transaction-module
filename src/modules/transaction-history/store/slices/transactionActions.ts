@@ -1,20 +1,29 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { Transaction } from "../../models/Transaction";
-import { ITransactionService } from "../../services/transctionService";
-import { IBiometricService } from "../../../core/services/biometricService";
-import { TransactionsState } from "./transactionSlice";
+import {
+  TransactionExtra,
+  TransactionsState,
+} from "../transactionHistoryStore";
 
 export const fetchTransactions = createAsyncThunk<
   Transaction[],
   void,
-  { extra: { transactionService: ITransactionService } }
+  {
+    extra: TransactionExtra;
+  }
 >("transactions/fetchTransactions", async (_, { extra }) => {
-  const { transactionService } = extra;
+  const { transactionService, loggerService } = extra;
   try {
+    console.log("fetchTransactions");
     return await transactionService.fetchTransactions();
   } catch (error) {
-    console.error("Failed to fetch transactions", error);
-    throw error;
+    loggerService.logError({
+      funName: "fetchTransactions",
+      message: "Failed to fetch transactions",
+      error: error,
+    });
+
+    return [];
   }
 });
 
@@ -23,20 +32,27 @@ export const revealAmounts = createAsyncThunk<
   boolean,
   void,
   {
-    state: { transactions: TransactionsState };
-    extra: { biometricService: IBiometricService };
+    state: TransactionsState;
+    extra: TransactionExtra;
   }
 >("transactions/revealAmounts", async (_, { getState, extra }) => {
-  const { biometricService } = extra;
-  const showAmounts = getState().transactions.showAmounts;
+  const { biometricService, loggerService } = extra;
+  const showAmounts = getState().showAmounts;
 
   if (showAmounts) {
     return false;
   } else {
-    const success = await biometricService.authenticateUser();
-    if (!success) {
-      throw new Error("Biometric authentication failed");
+    try {
+      const success = await biometricService.authenticateUser();
+      return success;
+    } catch (e) {
+      loggerService.logError({
+        funName: "revealAmounts",
+        message: "Failed to authenticate user",
+        error: e,
+      });
+
+      return false;
     }
-    return true;
   }
 });

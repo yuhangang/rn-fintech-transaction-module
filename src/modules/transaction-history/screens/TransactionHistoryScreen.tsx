@@ -1,20 +1,19 @@
+import { Eye, EyeOff } from "lucide-react-native";
 import React, { useEffect } from "react";
 import {
   FlatList,
   RefreshControl,
-  SafeAreaView,
+  StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  StyleSheet,
 } from "react-native";
-import { Eye, EyeOff, ArrowLeft } from "lucide-react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import TransactionHistoryItem from "../components/TranscationHistory/TransactionHistoryItem";
 import {
   useTansactionHistoryDispatch,
   useTransactionHistorySelector,
 } from "../store/hook";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   fetchTransactions,
   revealAmounts,
@@ -31,9 +30,13 @@ const TransactionHistoryScreen: React.FC<TransactionHistoryScreenProps> = ({
   navigation,
 }) => {
   const dispatch = useTansactionHistoryDispatch();
-  const { transactions, showAmounts, loading } = useTransactionHistorySelector(
+  const transactions = useTransactionHistorySelector(
     (state) => state.transactions
   );
+  const showAmounts = useTransactionHistorySelector(
+    (state) => state.showAmounts
+  );
+  const loading = useTransactionHistorySelector((state) => state.loading);
 
   useEffect(() => {
     dispatch(fetchTransactions());
@@ -55,10 +58,7 @@ const TransactionHistoryScreen: React.FC<TransactionHistoryScreenProps> = ({
 
   return (
     <View style={styles.container}>
-      <TransactionHistoryAppBar
-        handleRevealAmounts={handleRevealAmounts}
-        showAmounts={showAmounts}
-      />
+      <TransactionHistoryAppBar handleRevealAmounts={handleRevealAmounts} />
 
       <View style={styles.listContainer}>
         <FlatList
@@ -87,6 +87,34 @@ const TransactionHistoryScreen: React.FC<TransactionHistoryScreenProps> = ({
     </View>
   );
 };
+
+function TransactionHistoryAppBar({
+  handleRevealAmounts,
+}: {
+  handleRevealAmounts: () => void;
+}) {
+  const insets = useSafeAreaInsets();
+  const showAmounts = useTransactionHistorySelector(
+    (state) => state.showAmounts
+  );
+
+  return (
+    <View style={[styles.header, { paddingTop: insets.top }]}>
+      <Text style={styles.headerTitle}>Transaction History</Text>
+
+      <TouchableOpacity
+        onPress={handleRevealAmounts}
+        style={styles.visibilityToggle}
+      >
+        {showAmounts ? (
+          <EyeOff size={20} color="#333" />
+        ) : (
+          <Eye size={20} color="#333" />
+        )}
+      </TouchableOpacity>
+    </View>
+  );
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -142,29 +170,3 @@ const styles = StyleSheet.create({
 });
 
 export default TransactionHistoryScreen;
-function TransactionHistoryAppBar({
-  handleRevealAmounts,
-  showAmounts,
-}: {
-  handleRevealAmounts: () => void;
-  showAmounts: boolean;
-}) {
-  const insets = useSafeAreaInsets();
-
-  return (
-    <View style={[styles.header, { paddingTop: insets.top }]}>
-      <Text style={styles.headerTitle}>Transaction History</Text>
-
-      <TouchableOpacity
-        onPress={handleRevealAmounts}
-        style={styles.visibilityToggle}
-      >
-        {showAmounts ? (
-          <EyeOff size={20} color="#333" />
-        ) : (
-          <Eye size={20} color="#333" />
-        )}
-      </TouchableOpacity>
-    </View>
-  );
-}
