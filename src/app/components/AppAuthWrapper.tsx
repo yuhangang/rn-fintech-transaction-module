@@ -1,4 +1,3 @@
-import { Action, ThunkDispatch } from "@reduxjs/toolkit";
 import React, { useCallback, useEffect, useRef } from "react";
 import {
   AppState,
@@ -8,15 +7,18 @@ import {
   StyleSheet,
   View,
 } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import {
   authenticateUser,
   loginUser,
   setAuthenticated,
 } from "../../modules/core/store/auth/authActions";
-import { AuthState } from "../../modules/core/store/store";
+import { AuthState } from "../../modules/core/store/auth/authStore";
+import {
+  useAuthDispatch,
+  useAuthSelector,
+} from "../../modules/core/store/auth/hook";
 import { LoginScreen } from "./LoginScreen";
-import { useAuthDispatch } from "../../modules/core/store/auth/hook";
 
 export default function AppLifeycleWrapper({
   children,
@@ -24,8 +26,11 @@ export default function AppLifeycleWrapper({
   children?: React.ReactNode;
 }) {
   const dispatch = useAuthDispatch();
-  const { isAuthenticated, isLoggedIn } = useSelector(
-    (state: AuthState) => state.auth
+  const isAuthenticated = useSelector(
+    (state: { auth: AuthState }) => state.auth.isAuthenticated
+  );
+  const isLoggedIn = useSelector(
+    (state: { auth: AuthState }) => state.auth.isLoggedIn
   );
 
   const appState = useRef(AppState.currentState);

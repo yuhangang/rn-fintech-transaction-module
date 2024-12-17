@@ -1,10 +1,12 @@
-import Toast from "react-native-toast-message";
 import { IBiometricService } from "../../services/biometricService";
 import { BiometricAuthException } from "../../model/expections/authenticationExceptions";
 import { Dispatch } from "redux";
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import { IToastService } from "../../services/toastService";
+import { ILoggerService } from "../../services/loggerService";
+import { AuthExtras } from "./authStore";
 
-// TODO: handle error logging,and refactor toast service
+// TODO: handle unit tests
 
 // Action Types
 export const SET_AUTHENTICATED = "SET_AUTHENTICATED";
@@ -43,42 +45,40 @@ export const authenticateUser = createAsyncThunk<
   boolean,
   void,
   {
-    extra: { biometricService: IBiometricService };
+    extra: AuthExtras;
   }
 >("auth/authenticateUser", async (_, { dispatch, rejectWithValue, extra }) => {
+  const { biometricService, toastService, loggerService } = extra;
+
   try {
-    const { biometricService } = extra;
     const authSuccess = await biometricService.authenticateUser();
 
     if (authSuccess) {
       dispatch(setAuthenticated(true));
       return authSuccess;
     } else {
-      Toast.show({
-        type: "error",
-        text1: "Authentication Failed",
-        text2: "Failed to authenticate user",
-        visibilityTime: 3000,
-        position: "bottom",
+      toastService.showErrorMsg({
+        title: "Authentication Failed",
+        message: "Failed to authenticate user",
       });
       return rejectWithValue("Authentication failed");
     }
   } catch (error) {
     if (error instanceof BiometricAuthException) {
-      Toast.show({
-        type: "error",
-        text1: error.title,
-        text2: error.message,
-        visibilityTime: 3000,
-        position: "bottom",
+      toastService.showErrorMsg({
+        title: error.title,
+        message: error.message,
       });
     } else {
-      Toast.show({
-        type: "error",
-        text1: "Authentication Failed",
-        text2: "Something went wrong",
-        visibilityTime: 3000,
-        position: "bottom",
+      toastService.showErrorMsg({
+        title: "Authentication Failed",
+        message: "Something went wrong",
+      });
+
+      loggerService.logError({
+        funName: "authActions.authenticateUser",
+        message: "Authentication failed",
+        error,
       });
     }
     return rejectWithValue(error);
@@ -89,34 +89,43 @@ export const loginUser = createAsyncThunk<
   boolean,
   void,
   {
-    extra: { biometricService: IBiometricService };
+    extra: AuthExtras;
   }
 >("auth/loginUser", async (_, { dispatch, rejectWithValue, extra }) => {
+  const { biometricService, toastService, loggerService } = extra;
+
   try {
-    const { biometricService } = extra;
     const authSuccess = await biometricService.authenticateUser();
 
     if (authSuccess) {
       dispatch(setIsLogin(true));
       return authSuccess;
     } else {
-      Toast.show({
-        type: "error",
-        text1: "Login Failed",
-        text2: "Failed to authenticate user",
-        visibilityTime: 3000,
-        position: "bottom",
+      toastService.showErrorMsg({
+        title: "Login Failed",
+        message: "Failed to authenticate user",
       });
       return rejectWithValue("Login failed");
     }
   } catch (error) {
-    Toast.show({
-      type: "error",
-      text1: "Login Failed",
-      text2: "Something went wrong",
-      visibilityTime: 3000,
-      position: "bottom",
-    });
+    if (error instanceof BiometricAuthException) {
+      toastService.showErrorMsg({
+        title: error.title,
+        message: error.message,
+      });
+    } else {
+      toastService.showErrorMsg({
+        title: "Login Failed",
+        message: "Something went wrong",
+      });
+
+      loggerService.logError({
+        funName: "authActions.loginUser",
+        message: "Login failed",
+        error,
+      });
+    }
+
     return rejectWithValue(error);
   }
 });

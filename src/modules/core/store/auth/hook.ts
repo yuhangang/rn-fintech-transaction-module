@@ -1,5 +1,5 @@
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import { AuthDispatch, AuthState } from "../store";
+import { AuthDispatch, AuthState } from "./authStore";
 
 // Use throughout your app instead of plain `useDispatch` and `useSelector`
 export const useAuthDispatch = () => useDispatch<AuthDispatch>();

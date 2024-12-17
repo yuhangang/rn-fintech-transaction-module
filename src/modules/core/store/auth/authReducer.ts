@@ -1,3 +1,4 @@
+import { AuthState } from "./authStore";
 import {
   SET_AUTHENTICATED,
   RESET_AUTHENTICATION,
@@ -5,12 +6,6 @@ import {
   AuthAction,
   SET_IS_LOGGED_IN,
 } from "./authActions";
-
-export interface AuthState {
-  isLoggedIn: boolean;
-  isAuthenticated: boolean;
-  idleTimeout: number;
-}
 
 // Initial state
 const initialState: AuthState = {
